@@ -167,22 +167,19 @@ The application will be available at `http://127.0.0.1:5000`.
 
 ## Deployment
 
-Paper Desk can be deployed from this repository as a Koyeb web service. The
-included `Procfile` applies the Alembic migration and starts the application
-with Gunicorn.
+Paper Desk can be deployed using a free Render web service and a free Neon
+PostgreSQL database. The included `render.yaml` installs the runtime
+dependencies, applies the Alembic migration and starts the application with
+Gunicorn.
 
-1. Create a PostgreSQL database and copy its public connection URL.
-2. Create a Koyeb web service from the `main` branch of this repository.
-3. Select the buildpack builder and the free instance in Frankfurt.
-4. Add `DATABASE_URL` and `SECRET_KEY` as secrets. The database URL should use
-   SSL when required by the provider.
-5. Deploy the service. Koyeb will use the command in `Procfile`.
+1. Create a Neon project and copy its pooled PostgreSQL connection URL.
+2. In Render, create a new Blueprint from the `main` branch of this repository.
+3. Enter the Neon connection URL when Render requests `DATABASE_URL`.
+4. Deploy the Blueprint. Render generates `SECRET_KEY` automatically.
 
-Generate a suitable secret key locally with:
-
-```bash
-python -c "import secrets; print(secrets.token_hex(32))"
-```
+The Render service uses the free compute plan and checks `/` to confirm that a
+deployment is healthy. Free services sleep while inactive, so the first request
+after a period without traffic may take longer.
 
 ## Tests
 
