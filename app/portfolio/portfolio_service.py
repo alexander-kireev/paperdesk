@@ -1,11 +1,11 @@
 from app.db_core import DBCore
 from app.portfolio.portfolio_model import Portfolio
-from app.position.position_repo import get_user_equity_symbols
 
 from app.user.user_service import (
     get_user_by_id
 )
 
+from app.position.position_repo import get_user_equity_symbols
 from app.position.position_service import (
     aggregate_all_equity_positions,
     aggregate_total_value_of_equity_positions,
@@ -13,21 +13,23 @@ from app.position.position_service import (
 )
 
 
-# tested, functional, commented
 def get_portfolio(user_id):
-    """ Accepts a user_id and returns a portfolio object. """
+    """ Accepts a user_id and returns a result containing a portfolio object. """
 
     # update equity positions in positions table with live equity prices
-    update_positions_in_table(user_id)
+    update_result = update_positions_in_table(user_id)
+    if not update_result["success"]:
+        return {
+            "success": False,
+            "message": "Failed to update portfolio prices."
+        }
 
     try:
         with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
                 
-                # get user object
                 user = get_user_by_id(cur, user_id)
 
-                # ensure user is found
                 if not user:
                     return {
                         "success": False,
@@ -58,16 +60,22 @@ def get_portfolio(user_id):
                         }
 
                     # instantiate portfolio object with equities and cash_balance
-                    return Portfolio(user, total_equities_value, all_positions)
+                    return {
+                        "success": True,
+                        "message": Portfolio(user, total_equities_value, all_positions)
+                    }
 
                 # if user has no open equity positions, instantiate portfolio object with cash_balance only
                 else:
-                    return Portfolio(user)
+                    return {
+                        "success": True,
+                        "message": Portfolio(user)
+                    }
                 
-    except Exception as e:
+    except Exception:
         return {
             "success": False,
-            "message": f"Error. Failed to fetch portfolio: {e}."
+            "message": "Failed to fetch portfolio."
         }
 
 

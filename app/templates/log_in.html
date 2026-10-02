@@ -1,61 +1,18 @@
 {% extends "base.html" %}
-
-{% block title %}Log in{% endblock %}
-
+{% block title %}Log in | Paper Desk{% endblock %}
 {% block content %}
-<div class="container my-5">
-
-  <!-- heading -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <h2 class="fw-bold text-uppercase text-dark">Log In</h2>
-      <p class="text-muted">Access your account</p>
-    </div>
-  </div>
-
-  <!-- error message -->
-  {% if error %}
-    <div class="alert alert-danger text-center">
-      {{ error }}
-    </div>
-  {% endif %}
-
-  <!-- login card -->
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-      <div class="card shadow-sm">
-        <div class="card-body p-4">
-
-          <form action="/log_in" method="POST">
-
-            <!-- email -->
-            <div class="mb-3">
-              <label for="email" class="form-label fw-bold">Email</label>
-              <input type="text" class="form-control" id="email" name="email" required>
-            </div>
-
-            <!-- password -->
-            <div class="mb-3">
-              <label for="password" class="form-label fw-bold">Password</label>
-              <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-
-            <!-- submit -->
-            <div class="d-grid mb-3">
-              <button type="submit" class="btn btn-primary">Log In</button>
-            </div>
-
-            <!-- sign up link -->
-            <p class="text-center text-muted">
-              don’t have an account?
-              <a href="/sign_up" class="fw-bold text-decoration-none" style="color: var(--color-text);">sign up here</a>
-            </p>
-
-          </form>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="auth-main"><div class="auth-layout">
+  <section class="auth-copy"><p class="eyebrow">Welcome back</p><h1>Continue with your paper portfolio.</h1><p>Log in to review open positions, place simulated trades and access your account records.</p></section>
+  <section class="auth-card">
+    <h2>Log in</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack mt-3">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    <form class="form-grid" action="/log_in" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="button button-primary button-block" type="submit">Log in</button>
+    </form>
+    <p class="auth-switch">No account yet? <a href="/sign_up">Create one</a></p>
+  </section>
+</div></div>
 {% endblock %}

@@ -1,12 +1,19 @@
 from app.stock.stock_model import Stock
+
 from app.position.position_model import Position
 from app.position.positions_model import Positions
 
 
-# tested, functional, commented
 def get_user_single_position_of_equity(cur, user_id, symbol):
 
-    cur.execute(""" SELECT * FROM positions WHERE user_id=%s AND symbol=%s """, (user_id, symbol))
+    cur.execute("""
+        SELECT position_id, user_id, company_name, symbol, number_of_shares,
+               average_price_per_share, position_total
+        FROM positions
+        WHERE user_id=%s AND symbol=%s
+        ORDER BY position_id ASC
+        LIMIT 1
+    """, (user_id, symbol))
 
     row = cur.fetchone()
 
@@ -25,7 +32,6 @@ def get_user_single_position_of_equity(cur, user_id, symbol):
         return None
 
 
-# tested, functional, commented
 def get_user_equity_symbols(cur, user_id):
     """ Accepts a cursor and user_id, returns list of unique symbols of stocks
         the user has open positions on. """
@@ -47,13 +53,16 @@ def get_user_equity_symbols(cur, user_id):
     return symbols
 
 
-# tested, functional, commented
 def get_user_positions_of_equity(cur, user_id, symbol):
     """ Accepts cursor, user_id and symbol. Returns list of all open equity positions
         a user has of particular equity, as a list of object Position. """
 
     cur.execute(""" 
-        SELECT * FROM positions WHERE user_id=%s AND symbol=%s ORDER BY position_id ASC 
+        SELECT position_id, user_id, company_name, symbol, number_of_shares,
+               average_price_per_share, last_price_per_share, position_total, opened_at
+        FROM positions
+        WHERE user_id=%s AND symbol=%s
+        ORDER BY position_id ASC
         """, (
         user_id, 
         symbol
@@ -69,7 +78,7 @@ def get_user_positions_of_equity(cur, user_id, symbol):
     for row in rows:
         # unpack each row returned
         (position_id, user_id, company_name, symbol, number_of_shares, 
-        average_price_per_share, last_price_per_share, position_total, timestamp) = row
+        average_price_per_share, last_price_per_share, position_total, _opened_at) = row
 
         # refactor into Stock and then Position objects
         stock = Stock(company_name=company_name, symbol=symbol, price=average_price_per_share)
@@ -81,7 +90,6 @@ def get_user_positions_of_equity(cur, user_id, symbol):
     return Positions(user_id=user_id, symbol=symbol, positions=positions)
 
 
-# tested, functional, commented
 def close_position(cur, position):
     """ Accepts a cursor and position object, removes the position from table positions
         using position_id. """
@@ -91,7 +99,6 @@ def close_position(cur, position):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def update_position(cur, position):
     """ Accepts cursor and position object, updates the shares and total of position
         using position_id. """
@@ -108,7 +115,6 @@ def update_position(cur, position):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def log_position(cur, position):
     """  Accepts a cursor and position object, inserts the position into 
          positions table. """
@@ -130,7 +136,6 @@ def log_position(cur, position):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def update_positions_last_price(cur, user_id, symbol, live_price):
     """ Accepts cursor, user_id, symbol and live price of stock. Updates all positions
         held by user of this equity to reflect live price. """
@@ -142,12 +147,16 @@ def update_positions_last_price(cur, user_id, symbol, live_price):
     ))
 
     
-# tested, functional, commented
 def get_all_user_positions(cur, user_id):
     """ Accepts cursor and user_id, returns list of position objects held by user.
         Every position is included. """ 
     
-    cur.execute(""" SELECT * FROM positions WHERE user_id=%s """, (user_id,))
+    cur.execute("""
+        SELECT position_id, user_id, company_name, symbol, number_of_shares,
+               average_price_per_share, last_price_per_share, position_total
+        FROM positions
+        WHERE user_id=%s
+    """, (user_id,))
 
     rows = cur.fetchall()
 
@@ -159,19 +168,19 @@ def get_all_user_positions(cur, user_id):
     for row in rows:
         # unpack each row returned
         (position_id, user_id, company_name, symbol, number_of_shares, 
-        average_price_per_share, last_price_per_share, position_total, timestamp) = row
+        average_price_per_share, last_price_per_share, position_total) = row
 
         # refactor into Stock and then Position objects
         stock = Stock(company_name=company_name, symbol=symbol, price=average_price_per_share)
-        position = Position(stock=stock, number_of_shares=number_of_shares, user_id=user_id, 
-                            position_id=position_id, last_price_per_share=last_price_per_share)
+        position = Position(stock=stock, number_of_shares=number_of_shares, user_id=user_id,
+                            position_id=position_id, last_price_per_share=last_price_per_share,
+                            total_value=position_total)
 
         positions.append(position)
     
     return positions
 
 
-# tested, functional, commented
 def update_list_of_positions(cur, positions):
     """ Accepts a cursor and list of position objects, updating the last_price_per_share, 
         number_of_shares and position_total. """  
@@ -195,10 +204,11 @@ def update_list_of_positions(cur, positions):
 
 
 def user_has_position_of_symbol(cur, user_id, symbol):
-    cur.execute(""" SELECT * FROM positions WHERE user_id=%s and symbol=%s """,
-                (user_id, symbol))
-    
-    return cur.rowcount > 0
+    cur.execute("""
+        SELECT 1 FROM positions WHERE user_id=%s AND symbol=%s LIMIT 1
+    """, (user_id, symbol))
+
+    return cur.fetchone() is not None
 
 
 

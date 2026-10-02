@@ -1,5 +1,4 @@
 
-# tested, functional, commented
 class Positions:
     def __init__(self, user_id, symbol, positions):
         self.user_id = user_id

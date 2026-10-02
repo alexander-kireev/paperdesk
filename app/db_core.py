@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 # load database
 load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
@@ -16,6 +17,12 @@ class DBCore:
     @staticmethod
     def get_connection():
         """ Returns a psycopg2 database connection. """
+
+        if DATABASE_URL:
+            database_url = DATABASE_URL.replace(
+                "postgres://", "postgresql://", 1
+            )
+            return psycopg2.connect(database_url)
         
         return psycopg2.connect(
                 host=DB_HOST,

@@ -6,10 +6,8 @@ from app.transaction.transaction_repo import (
     get_transactions
 )
 
-# tested, functional, commented
 def get_user_transaction_history(user_id, start_date=None, end_date=None):
-    """ Accepts a user_id and optionally start and end dates. Queries
-        transactions table and returns list of transaction objects of user. """
+    """ Return a result dictionary containing transactions for an optional date range. """
 
     try:
         with DBCore.get_connection() as conn:
@@ -33,10 +31,10 @@ def get_user_transaction_history(user_id, start_date=None, end_date=None):
                         "success": True,
                         "message": transactions_list
                     }
-            
-    except Exception as e:
+
+    except Exception:
         return {
             "success": False,
-            "message": f"Error. Failed to retrieve user transactions: {e}."
+            "message": "Failed to retrieve user transactions."
         }
-      
+

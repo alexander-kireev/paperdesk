@@ -1,131 +1,52 @@
 {% extends "base.html" %}
-
-{% block title %}Market{% endblock %}
-
+{% block title %}Market | Paper Desk{% endblock %}
 {% block content %}
-<div class="container my-5">
+<div class="app-main">
+  <header class="page-heading"><div><h1>Market</h1><p>Search for a listed company, review the current information and place a simulated order.</p></div></header>
 
-  <!-- heading -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <h2 class="fw-bold text-uppercase text-dark">Market</h2>
-      <p class="text-muted">Search for stocks and place trades</p>
-    </div>
-  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+  <div class="notice notice-info">The price shown is supplied by an external market-data service and may be delayed.</div>
 
-  <!-- flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }} text-center">
-          {{ msg }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <div class="row g-4">
-
-    <!-- stock search -->
-    <div class="col-md-5">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          Search Stock
-        </div>
-        <div class="card-body">
-          <form action="/market" method="GET">
-            <div class="mb-3">
-              <label for="ticker" class="form-label">Enter stock symbol:</label>
-              <input type="text" class="form-control" id="ticker" name="ticker" placeholder="e.g. AAPL, TSLA">
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Search</button>
-          </form>
-        </div>
+  <div class="search-layout">
+    <section class="card">
+      <div class="card-header"><h2>Search for a share</h2></div>
+      <div class="card-body">
+        <form action="/market" method="GET">
+          <div class="field"><label for="ticker">Share symbol</label><input id="ticker" name="ticker" value="{{ stock.symbol|upper if stock else '' }}" placeholder="For example, AAPL" required></div>
+          <p class="search-help">Enter a market symbol such as AAPL, MSFT or TSLA.</p>
+          <button class="button button-primary button-block mt-3" type="submit">Search</button>
+        </form>
       </div>
-    </div>
+    </section>
 
-    <!-- stock info + order -->
-    <div class="col-md-7">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          Stock Details
-        </div>
+    <section class="card">
+      <div class="card-header"><h2>{{ stock.company_name|titlecase if stock else 'Share information' }}</h2><span class="symbol">{{ stock.symbol|upper if stock else '' }}</span></div>
+      {% if stock %}
         <div class="card-body">
-
           <form action="/place_order" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" id="display_stock_symbol" name="display_stock_symbol" value="{{ stock.symbol }}">
+            <input type="hidden" id="display_company_name" name="display_company_name" value="{{ stock.company_name }}">
+            <input type="hidden" id="display_shares_held" name="display_shares_held" value="{{ shares_held }}">
+            <input type="hidden" id="display_average_price_per_share" name="display_average_price_per_share" value="{{ average_price_per_share }}">
+            <input type="hidden" id="display_total_position_value" name="display_total_position_value" value="{{ total_position_value }}">
+            <input type="hidden" id="display_current_price" name="display_current_price" value="{{ stock.price }}">
 
-            <!-- symbol -->
-            <div class="row mb-3">
-              <div class="col-sm-5 fw-bold">Symbol:</div>
-              <div class="col-sm-7">{{ stock.symbol|toupper if stock else '-' }}</div>
-              <input type="hidden" id="display_stock_symbol" name="display_stock_symbol"
-                     value="{{ stock.symbol if stock else '' }}">
+            <div class="quote-grid">
+              <div class="quote-item"><span>Current price</span><strong>${{ stock.price|currency }}</strong></div>
+              <div class="quote-item"><span>Shares held</span><strong>{{ shares_held if shares_held else 0 }}</strong></div>
+              <div class="quote-item"><span>Average purchase price</span><strong>{{ ('$' ~ (average_price_per_share|currency)) if average_price_per_share else '-' }}</strong></div>
+              <div class="quote-item"><span>Current position value</span><strong>{{ ('$' ~ (total_position_value|currency)) if total_position_value else '-' }}</strong></div>
             </div>
 
-            <!-- company -->
-            <div class="row mb-3">
-              <div class="col-sm-5 fw-bold">Company:</div>
-              <div class="col-sm-7">{{ stock.company_name|titlecase if stock else '-' }}</div>
-              <input type="hidden" id="display_company_name" name="display_company_name"
-                     value="{{ stock.company_name if stock else '' }}">
-            </div>
-
-            <!-- shares held -->
-            <div class="row mb-3">
-              <div class="col-sm-5 fw-bold">Shares held:</div>
-              <div class="col-sm-7">{{ shares_held if shares_held else 0 }}</div>
-              <input type="hidden" id="display_shares_held" name="display_shares_held"
-                     value="{{ shares_held }}">
-            </div>
-
-            <!-- average cost -->
-            <div class="row mb-3">
-              <div class="col-sm-5 fw-bold">Avg. cost/share:</div>
-              <div class="col-sm-7">
-                {{ average_price_per_share|currency if average_price_per_share else '-' }}
-              </div>
-              <input type="hidden" id="display_average_price_per_share" name="display_average_price_per_share"
-                     value="{{ average_price_per_share }}">
-            </div>
-
-            <!-- total position -->
-            <div class="row mb-3">
-              <div class="col-sm-5 fw-bold">Total value:</div>
-              <div class="col-sm-7">
-                {{ total_position_value|currency if total_position_value else '-' }}
-              </div>
-              <input type="hidden" id="display_total_position_value" name="display_total_position_value"
-                     value="{{ total_position_value }}">
-            </div>
-
-            <!-- current price -->
-            <div class="row mb-4">
-              <div class="col-sm-5 fw-bold">Current price:</div>
-              <div class="col-sm-7">
-                {{ stock.price|currency if stock else '-' }}
-              </div>
-              <input type="hidden" id="display_current_price" name="display_current_price"
-                     value="{{ stock.price if stock else '' }}">
-            </div>
-
-            <!-- order amount -->
-            <div class="mb-3">
-              <label for="order_amount" class="form-label">Number of shares:</label>
-              <input type="number" min="1" max="100000" class="form-control" required id="order_amount" name="order_amount">
-            </div>
-
-            <!-- actions -->
-            <div class="d-flex justify-content-between">
-              <button type="submit" name="action" value="BUY" class="btn btn-buy w-50 me-2">Buy</button>
-              <button type="submit" name="action" value="SELL" class="btn btn-sell w-50">Sell</button>
-            </div>
-
+            <div class="field"><label for="order_amount">Number of shares</label><input id="order_amount" name="order_amount" type="number" min="1" max="100000" required></div>
+            <div class="segmented-actions"><button class="button button-buy" type="submit" name="action" value="BUY">Buy shares</button><button class="button button-sell" type="submit" name="action" value="SELL">Sell shares</button></div>
           </form>
-
         </div>
-      </div>
-    </div>
-
+      {% else %}
+        <div class="empty-state"><div class="empty-icon" aria-hidden="true">⌕</div><h3>Search to view a share</h3><p>Company information, the latest price and your current position will appear here.</p></div>
+      {% endif %}
+    </section>
   </div>
 </div>
 {% endblock %}

@@ -1,79 +1,68 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Trading App{% endblock %}
+{% block title %}Paper Desk | Paper trading{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-
-  <!-- hero section -->
-  <div class="row align-items-center mb-5">
-    <!-- text -->
-    <div class="col-md-6 text-center text-md-start">
-      <h1 class="fw-bold mb-3">Welcome to the Trading App</h1>
-      <p class="lead text-muted mb-4">
-        Track stocks, manage trades, and view your portfolio — all in one place.  
-        Designed for speed, clarity, and simplicity.
-      </p>
-      <a class="btn btn-primary btn-lg me-2" href="/log_in">View Portfolio</a>
-      <a class="btn btn-secondary btn-lg" href="/sample_market">Search Stocks</a>
-    </div>
-    <!-- image -->
-    <div class="col-md-6 text-center">
-      <img src="{{ url_for('static', filename='img/trading_dashboard.svg') }}" 
-           class="img-fluid rounded" 
-           alt="Trading dashboard illustration">
+<section class="container-xl px-3 px-lg-4 hero">
+  <div class="hero-copy-block">
+    <h1>Practise trading with a portfolio you can understand.</h1>
+    <p class="hero-copy">Paper Desk lets you search current market prices, place simulated trades and follow the value of your holdings. Your activity is recorded in one account, with histories and downloadable statements available when you need them.</p>
+    <div class="button-row">
+      <a class="button button-primary" href="/sign_up">Create an account</a>
+      <a class="button button-secondary" href="/sample_market">Explore the market</a>
     </div>
   </div>
-
-  <!-- feature highlights -->
-  <div class="row text-center mb-5">
-    <div class="col-md-4">
-      <i class="bi bi-bar-chart-line fs-1 text-primary mb-3"></i>
-      <h5 class="fw-bold">Real-Time Prices</h5>
-      <p class="text-muted">Stay updated with live stock data pulled directly from the market.</p>
-    </div>
-    <div class="col-md-4">
-      <i class="bi bi-wallet2 fs-1 text-primary mb-3"></i>
-      <h5 class="fw-bold">Portfolio Management</h5>
-      <p class="text-muted">Easily track your holdings, positions, and overall performance.</p>
-    </div>
-    <div class="col-md-4">
-      <i class="bi bi-graph-up-arrow fs-1 text-primary mb-3"></i>
-      <h5 class="fw-bold">Trade Simulation</h5>
-      <p class="text-muted">Practice trading without risk and refine your strategies.</p>
+  <div class="product-window" aria-label="Paper Desk demonstration">
+    <div class="window-bar" aria-hidden="true"><span class="window-dot"></span><span class="window-dot"></span><span class="window-dot"></span></div>
+    <div class="demo-stage">
+      <section class="demo-scene">
+        <div class="demo-label">1. Search the market</div><h2 class="demo-heading">Find a listed company by symbol</h2>
+        <div class="demo-form"><div class="demo-input">AAPL</div><span class="button button-primary button-small">Search</span></div>
+        <div class="demo-card"><div class="demo-result"><div><span>Symbol</span><strong>AAPL</strong></div><div><span>Company</span><strong>Apple Inc.</strong></div><div><span>Current price</span><strong>$334.23</strong></div></div></div>
+      </section>
+      <section class="demo-scene">
+        <div class="demo-label">2. Place a simulated order</div><h2 class="demo-heading">Choose a quantity and review the result</h2>
+        <div class="demo-card"><div class="demo-result"><div><span>Order</span><strong>Buy</strong></div><div><span>Quantity</span><strong>3 shares</strong></div><div><span>Estimated total</span><strong>$1,002.69</strong></div></div>
+          <div class="demo-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Purchase recorded. Your portfolio and cash balance have been updated.</div>
+        </div>
+      </section>
+      <section class="demo-scene">
+        <div class="demo-label">3. Follow the portfolio</div><h2 class="demo-heading">See cash and holdings in one place</h2>
+        <div class="mini-stats"><div class="mini-stat"><span>Cash balance</span><strong>$10,500.00</strong></div><div class="mini-stat"><span>Holdings</span><strong>$2,038.39</strong></div><div class="mini-stat"><span>Total value</span><strong>$12,538.39</strong></div></div>
+        <div class="demo-card"><table class="mini-table"><thead><tr><th>Symbol</th><th>Shares</th><th>Current value</th></tr></thead><tbody><tr><td><strong>AAPL</strong></td><td>3</td><td>$1,002.69</td></tr><tr><td><strong>MSFT</strong></td><td>2</td><td>$1,035.70</td></tr></tbody></table></div>
+      </section>
     </div>
   </div>
+</section>
 
-  <!-- cards row -->
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Explore the Market</h5>
-          <p class="card-text">Search stocks, check prices, and discover new opportunities.</p>
-          <a href="/log_in" class="btn btn-primary">Go to Market</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">View Your Trades</h5>
-          <p class="card-text">Browse your trade history and download PDF reports.</p>
-          <a href="/log_in" class="btn btn-primary">Trade History</a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body text-center">
-          <h5 class="card-title">Manage Your Account</h5>
-          <p class="card-text">Deposit, withdraw, and keep track of your cash balance.</p>
-          <a href="/log_in" class="btn btn-primary">My Account</a>
-        </div>
-      </div>
-    </div>
+<section class="capability-strip" aria-label="Product summary"><div class="container-xl px-3 px-lg-4 capability-grid">
+  <div class="capability"><strong>Simulated funds</strong><span>Practise without placing real orders.</span></div>
+  <div class="capability"><strong>Current market data</strong><span>Search shares and retrieve current prices through yfinance.</span></div>
+  <div class="capability"><strong>Clear account records</strong><span>Review trades, deposits and withdrawals from one account.</span></div>
+</div></section>
+
+<section class="section section-white" id="how-it-works"><div class="container-xl px-3 px-lg-4">
+  <div class="section-heading"><p class="eyebrow">How it works</p><h2>From registration to a complete paper portfolio.</h2><p>Paper Desk keeps the process direct. Each step records the information needed to understand the account later.</p></div>
+  <div class="steps">
+    <article class="step-card"><div class="step-number">1</div><h3>Create your account</h3><p>Register and receive a starting balance of simulated funds.</p></article>
+    <article class="step-card"><div class="step-number">2</div><h3>Search and trade</h3><p>Find a listed company, review its current price and choose how many shares to buy or sell.</p></article>
+    <article class="step-card"><div class="step-number">3</div><h3>Follow your portfolio</h3><p>Review open positions, available cash and recorded activity as prices change.</p></article>
   </div>
+</div></section>
 
-</div>
+<section class="section" id="features"><div class="container-xl px-3 px-lg-4">
+  <div class="section-heading"><p class="eyebrow">Features</p><h2>The information needed to review each decision.</h2><p>The application keeps market searches, holdings and account activity connected without overloading the interface.</p></div>
+  <div class="feature-grid">
+    <article class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></div><h3>Market search</h3><p>Search by share symbol and review current company and price information.</p></article>
+    <article class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg></div><h3>Portfolio tracking</h3><p>Combine cash and open positions into a current view of the account.</p></article>
+    <article class="feature-card"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h9l4 4v16H6z"/><path d="M14 2v5h5M9 12h7M9 16h7"/></svg></div><h3>Downloadable records</h3><p>Generate PDF statements for the portfolio, trades and account transactions.</p></article>
+  </div>
+</div></section>
+
+<section class="section section-white"><div class="container-xl px-3 px-lg-4 showcase-list">
+  <article class="showcase"><div class="showcase-frame"><img src="{{ url_for('static', filename='img/showcase/market.png') }}" alt="Paper Desk market page"></div><div class="showcase-copy"><p class="eyebrow">Search the market</p><h3>Review the share before placing an order.</h3><p>Search by symbol to retrieve the company, current price and the number of shares already held in your account.</p></div></article>
+  <article class="showcase"><div class="showcase-frame"><img src="{{ url_for('static', filename='img/showcase/portfolio.png') }}" alt="Paper Desk portfolio page"></div><div class="showcase-copy"><p class="eyebrow">Manage a portfolio</p><h3>Cash and holdings remain visible together.</h3><p>Each purchase creates an open position. Paper Desk combines those positions into a portfolio containing available cash, holdings and current value.</p></div></article>
+</div></section>
+
+<section class="section"><div class="container-xl px-3 px-lg-4"><div class="cta-panel"><div><h2>Ready to build a paper portfolio?</h2><p>Create an account and begin with simulated funds.</p></div><a class="button button-secondary" href="/sign_up">Create account</a></div></div></section>
 {% endblock %}

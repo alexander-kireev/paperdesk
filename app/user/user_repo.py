@@ -1,71 +1,72 @@
 from app.user.user_model import User
 
-# tested, functional, commented
 def insert_user(cur, user):
     """ Accepts cursor and user object, inserts it into users table. """
 
     cur.execute("""
-        INSERT INTO users (first_name, last_name, dob, email, password_hash, cash_balance, total_balance)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (first_name, last_name, dob, email, password_hash, cash_balance)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, (
         user.first_name, 
         user.last_name, 
         user.dob, 
         user.email, 
-        user.password_hash, 
-        user.cash_balance,
-        user.total_balance
+        user.password_hash,
+        user.cash_balance
     ))
 
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def get_user_by_email(cur, email):
     """ Accepts cursor and email address, queries users table to find user based on
         email address, returns user object. """
-    cur.execute("""SELECT * FROM users WHERE email=%s""", (email,))
+    cur.execute("""
+        SELECT id, first_name, last_name, dob, email, password_hash, cash_balance
+        FROM users
+        WHERE email=%s
+    """, (email.strip().lower(),))
     
     row = cur.fetchone()
     
     if row:
-        id, first_name, last_name, dob, email, password_hash, cash_balance, total_balance = row
+        id, first_name, last_name, dob, email, password_hash, cash_balance = row
         return User(id=id, 
                     first_name=first_name, 
                     last_name=last_name,
                     dob=dob, 
                     password_hash=password_hash,
-                    email=email, 
-                    cash_balance=cash_balance, 
-                    total_balance=total_balance)           
+                    email=email,
+                    cash_balance=cash_balance)
     else:
         return None
     
 
-# tested, functional, commented
 def get_user_by_id(cur, id):
     """ Accepts cursor and user id, queries users table to find user based on
     id, returns user object. """
 
-    cur.execute(""" SELECT * FROM users WHERE id=%s """, (id,))
+    cur.execute("""
+        SELECT id, first_name, last_name, dob, email, password_hash, cash_balance
+        FROM users
+        WHERE id=%s
+    """, (id,))
     
     row = cur.fetchone()
 
     if row:
-        id, first_name, last_name, dob, email, password_hash, cash_balance, total_balance = row
+        id, first_name, last_name, dob, email, password_hash, cash_balance = row
         return User(id=id, 
                     first_name=first_name, 
                     last_name=last_name,
                     dob=dob, 
                     password_hash=password_hash,
-                    email=email, 
-                    cash_balance=cash_balance, 
-                    total_balance=total_balance)           
+                    email=email,
+                    cash_balance=cash_balance)
     else:
         return None
 
 
-# tested, functional, commented
 def remove_user(cur, user_id):
     """ Accepts cursor and user_id, removes user from users table based on user_id. """
 
@@ -73,15 +74,14 @@ def remove_user(cur, user_id):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def insert_user_email(cur, user_id, new_email):
     """  Accepts cursor, user_id and new_email, updates user's email in users table. """
 
-    cur.execute(""" UPDATE users SET email=%s WHERE id=%s """, (new_email, user_id))
+    cur.execute(""" UPDATE users SET email=%s WHERE id=%s """,
+                (new_email.strip().lower(), user_id))
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def insert_user_password(cur, user_id, new_password):
     """  Accepts cursor, user_id and new_password, updates user's password in users table. """
 
@@ -89,7 +89,6 @@ def insert_user_password(cur, user_id, new_password):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def update_user_cash_balance(cur, user_id, new_balance):
     """  Accepts cursor, user_id and new_balance, updates user's cash balance in users table. """
 
@@ -97,7 +96,6 @@ def update_user_cash_balance(cur, user_id, new_balance):
     return cur.rowcount > 0
 
 
-# tested, functional, commented
 def insert_user_first_name(cur, user_id, first_name):
     """ Accepts a cursor, user_id and first_name, updates user's first name in table users. """
 
@@ -106,7 +104,6 @@ def insert_user_first_name(cur, user_id, first_name):
     return cur.rowcount == 1
 
 
-# tested, functional, commented
 def insert_user_last_name(cur, user_id, last_name):
     """ Accepts a cursor, user_id and last_name, updates user's last name in table users. """
 
@@ -115,9 +112,8 @@ def insert_user_last_name(cur, user_id, last_name):
     return cur.rowcount == 1
 
 
-# tested, functional, commented
 def insert_user_dob(cur, user_id, dob):
-    """ Accepts a cursor, user_id and first_name, updates user's date of birth in table users. """
+    """ Accepts a cursor, user_id and date of birth, then updates the user record. """
 
     cur.execute(""" UPDATE users SET dob=%s WHERE id=%s """,
                 (dob, user_id))

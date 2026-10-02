@@ -1,14 +1,14 @@
-from app.db_core import DBCore
-from app.position.position_model import Position
-from app.stock.stock_service import create_stock
 from datetime import datetime, timedelta
-from app.trade.trade_model import Trade
+from decimal import Decimal
+from app.db_core import DBCore
 
+from app.trade.trade_model import Trade
 from app.trade.trade_repo import (
     log_trade,
     get_trades
 )
 
+from app.position.position_model import Position
 from app.position.position_repo import (
     get_user_positions_of_equity,
     log_position,
@@ -22,31 +22,21 @@ from app.user.user_repo import (
 )
 
 
-# tested, functional, commented
-def buy_stock(user_id, symbol, number_of_shares):
-    """ Accepts stock object, number of shares to buy, user_id and updates the holdings
-        and trades_log tables. """
-    
-    conn = DBCore.get_connection()
+def buy_stock(user_id, stock, number_of_shares):
+    """ Record a share purchase and return a result dictionary. """
     
     try:
-        with conn:
+        with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
                 
-                # get used object
                 user = get_user_by_id(cur, user_id)
-
-                # get live stock object
-                stock = create_stock(symbol)
-                
-                # calculate trade_amount
                 trade_amount = stock.price * number_of_shares
 
                 # ensure user has sufficient cash_balance to purchase shares
                 if user.cash_balance < trade_amount:
                     return {
                         "success": False,
-                        "message": "Insufficient cash balance to purchases shares."
+                        "message": "Insufficient cash balance to purchase shares."
                     }
 
                 # instantiate trade object
@@ -70,8 +60,7 @@ def buy_stock(user_id, symbol, number_of_shares):
                         "message": "Failed to log position."
                     }
 
-                # calcuate user's new cash_balance      
-                new_cash_balance = float(user.cash_balance) - trade_amount
+                new_cash_balance = user.cash_balance - trade_amount
 
                 # update user's cash_balance
                 if not update_user_cash_balance(cur, user_id, new_cash_balance):
@@ -86,27 +75,23 @@ def buy_stock(user_id, symbol, number_of_shares):
                     "message": "Shares successfully purchased."
                 }                 
                     
-    except Exception as e:
+    except Exception:
         return {
             "success": False,
-            "message": f"Error. Failed to purchase shares: {e}."
+            "message": "Failed to purchase shares."
         }
             
 
-# tested, functional, commented
-def sell_stock(user_id, symbol, number_of_shares):
-    """ Accepts stock object, number of shares to sell and user_id. Ensures user has
-        sufficient long position(s) open to sell desired number of shares. This function
-        DOES NOT allow for short selling. """
+def sell_stock(user_id, stock, number_of_shares):
+    """ Sell shares from the user's open positions and return a result dictionary.
+        This function does not allow short selling. """
 
     try:
         with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
                 
                 # get positions object with list of positions of single stock
-                positions = get_user_positions_of_equity(cur, user_id, symbol)
-
-                print(positions.total_number_of_shares)
+                positions = get_user_positions_of_equity(cur, user_id, stock.symbol)
                 
                 # ensure user has sufficient shares to sell desired amount
                 if number_of_shares > positions.total_number_of_shares:
@@ -117,11 +102,8 @@ def sell_stock(user_id, symbol, number_of_shares):
                 
                 # set counters
                 transaction_type = "SELL"
-                total_value_shares_sold = 0
+                total_value_shares_sold = Decimal("0.00")
                 position_number = 0
-
-                # instantiate live stock object
-                stock = create_stock(symbol)
 
                 # run loop while shares remain to be sold
                 while number_of_shares > 0:
@@ -182,12 +164,11 @@ def sell_stock(user_id, symbol, number_of_shares):
 
                     # increment to move onto next position in list if need to sell more shares
                     position_number += 1
-                
-                # get user object
+
                 user = get_user_by_id(cur, user_id)
                 
                 # update cash_balance in user object
-                new_user_cash_balance = float(user.cash_balance) + float(total_value_shares_sold)
+                new_user_cash_balance = user.cash_balance + total_value_shares_sold
 
                 # update cash_balance in users table
                 if not update_user_cash_balance(cur, user_id, new_user_cash_balance):
@@ -205,18 +186,15 @@ def sell_stock(user_id, symbol, number_of_shares):
                         "message": "Shares successfully sold."
                     }
         
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
             "success": False,
-            "message": (f"Error. Failed to sell shares: {e}.")
+            "message": "Failed to sell shares."
         }
 
 
-# tested, functional, commented
 def get_user_trade_history(user_id, start_date=None, end_date=None):
-    """ Accepts a user_id and optionally start and end dates. Queries
-        trades_log table and returns list of trade objects of user. """
+    """ Return a result dictionary containing the user's trades for an optional date range. """
 
     try:
         with DBCore.get_connection() as conn:
@@ -241,9 +219,9 @@ def get_user_trade_history(user_id, start_date=None, end_date=None):
                         "message": trades_list
                     }
             
-    except Exception as e:
+    except Exception:
         return {
             "success": False,
-            "message": f"Error. Failed to retrieve user trades: {e}."
+            "message": "Failed to retrieve user trades."
         }
       

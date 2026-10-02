@@ -1,67 +1,93 @@
 import bcrypt
 import re
+from datetime import date
+from decimal import Decimal, InvalidOperation
 
-# tested, functional, commented
+NAME_MIN_LEN = 1
+NAME_MAX_LEN = 50
+
+PASSWORD_MIN_LEN = 12
+PASSWORD_MAX_LEN = 24
+
+WITHDRAW_MIN_AMOUNT = Decimal("10.00")
+WITHDRAW_MAX_AMOUNT = Decimal("1000000.00")
+
+
+
 def email_is_valid(email):
-    """ Accepts an email, returns true if the email is valid based on a regex function. """
-    
+    """ Return a normalised email address when valid, otherwise return a false value. """
+
     # ensure email is a string
     if not isinstance(email, str):
         return False
-    
+
+    email = email.strip().lower()
+
     # ensure string fits pattern of email type
     pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
     match = re.match(pattern, email)
     if match is not None:
-        return True
+        return email
     else:
-        return False
+        return None
 
 
-# tested, functional, commented
 def hash_password(password):
-    """ Accepts a password and returns a hash of it. """
+    """ Accepts a password and returns a hash. """
 
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
-# tested, functional, commented
 def verify_password(password, hashed_password):
-    """ Accepts a plaintext password and a hash of a password, returns true if they match. """
+    """ Accepts a plaintext password and a hash, returns true if they match. """
 
     return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
-# tested, functional, commented
 def validate_registration_data(data):
-    """ Accepts a dict containing user registration data, validates it, returns true
-        if all inputs are valid. """
+    """ Validate registration data and return a result dictionary. """
 
-    if not valid_first_name(data["first_name"]):
+    first_name = valid_first_name(data["first_name"])
+
+    if not first_name:
         return {
             "success": False,
             "message": "Invalid first name."
         }
-    
-    if not valid_last_name(data["last_name"]): #
+
+    last_name = valid_last_name(data["last_name"])
+
+    if not last_name:
         return {
             "success": False,
             "message": "Invalid last name."
         }
-    
-    if not email_is_valid(data["email"]): #
+
+    dob = valid_dob(data["dob"])
+
+    if not dob:
+        return {
+            "success": False,
+            "message": "Invalid date of birth."
+        }
+
+    email = email_is_valid(data["email"])
+
+    if not email:
         return {
             "success": False,
             "message": "Invalid email address."
         }
-    
-    if not valid_password(data["first_password"]): #
+
+    password = valid_password(data["first_password"])
+
+    if not password:
         return {
             "success": False,
             "message": """Password must contain at least one lowercase character, one uppercase character,
                         one number and be between 12 and 24 characters long."""
         }
-    
+
     if not passwords_match(data["first_password"], data["second_password"]): #
         return {
             "success": False,
@@ -70,73 +96,63 @@ def validate_registration_data(data):
 
     return {
         "success": True,
-        "message": "Registration data is valid."
-    }   
+        "data": {
+            "first_name": first_name,
+            "last_name": last_name,
+            "dob": dob,
+            "email": email,
+            "password": password,
+        },
+    }
 
 
-# tested, functional, commented
 def valid_first_name(first_name):
-    """ Accepts first_name, returns true if it is within length boundaries and contains only 
-        alphanumerical characters. """
-
-    # establish mix/max boundaries
-    min_length = 1
-    max_length = 50
+    """ Return a normalised first name when it meets the validation rules. """
 
     try:
-        
-        # format
-        first_name = first_name.strip().lower()
+        first_name = first_name.lower()
 
-        # check length
-        if len(first_name) < min_length or len(first_name) > max_length:
-            return False
-        
-        return first_name.isalpha()
-    
+        if not NAME_MIN_LEN <= len(first_name) <= NAME_MAX_LEN:
+            return None
+
+        if not first_name.isalpha():
+            return None
+
+        return first_name
+
     except (ValueError, TypeError):
         return None
 
 
-# tested, functional, commented
 def valid_last_name(last_name):
-    """ Accepts last_name, returns true if it is within length boundaries and contains only 
-        alphanumerical characters. """
-
-    # establish mix/max boundaries
-    min_length = 1
-    max_length = 50
+    """ Return a normalised last name when it meets the validation rules. """
 
     try:
-        
-        # format
-        last_name = last_name.strip().lower()
+        last_name = last_name.lower()
 
-        # check length
-        if len(last_name) < min_length or len(last_name) > max_length:
-            return False
-        
-        return last_name.isalpha()
-    
+        if not NAME_MIN_LEN <= len(last_name) <= NAME_MAX_LEN:
+            return None
+
+        if not last_name.isalpha():
+            return None
+
+        return last_name
+
     except (ValueError, TypeError):
         return None
 
 
-# tested, functional, commented
 def valid_password(password):
-    """ Accepts a password and checks if it is valid (is betwen 8 and 24 characters long,
-        contains at least one digit, one uppercase and lowercase characters.) """
+    """ Accepts a password and checks if it is between 12 and 24 characters long
+        and contains at least one digit, one uppercase and one lowercase character. """
 
-    # set flags to false
     has_lowercase = False
     has_uppercase = False
     has_digit = False
 
-    # ensure length is between 8 and 24 chars
-    if len(password) < 12 or len(password) > 24:
-        return False
+    if not PASSWORD_MIN_LEN <= len(password) <= PASSWORD_MAX_LEN:
+        return None
 
-    # ensure digit, lower and upper case chars are present
     for char in password:
         if char.isdigit():
             has_digit = True
@@ -145,49 +161,78 @@ def valid_password(password):
         elif char.isupper():
             has_uppercase = True
         else:
-            return False
+            return None
 
-    # check if all conditions have been met
     if has_digit and has_lowercase and has_uppercase:
-        return True
+        return password
     else:
-        return False
+        return None
 
 
-# tested, functional, commented
 def passwords_match(password_1, password_2):
     """ Accepts two passwords, ensures they match. """
 
     return password_1 == password_2
 
 
-# tested, functional, commented
 def valid_deposit_and_withdraw_amount(amount):
-    """  Accepts amount and ensure it is of correct type and is within min/max boundaries. """
-
-    # set min/max boundaries
-    min = 10
-    max = 1000000
+    """ Accepts an amount and returns it as a Decimal if it is valid. """
 
     try:
-        amount = float(amount)
-        if amount > min and amount < max:
-            return True
-        return False
-    except (ValueError, TypeError):
-        return False
-    
+        amount = Decimal(str(amount))
+        if amount != amount.quantize(Decimal("0.01")):
+            return None
 
-#TODO: FIX! 
+        amount = amount.quantize(Decimal("0.01"))
+        if not WITHDRAW_MIN_AMOUNT <= amount <= WITHDRAW_MAX_AMOUNT:
+            return None
+        return amount
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
 def valid_num_shares(num_shares):
-    
+
     try:
         num_shares = int(num_shares)
 
         if num_shares < 1 or num_shares > 100000:
             return None
-        
+
         return num_shares
-    
+
     except (ValueError, TypeError):
         return None
+
+
+def valid_dob(value):
+    if not isinstance(value, str):
+        return None
+
+    try:
+        dob = date.fromisoformat(value.strip())
+    except ValueError:
+        return None
+
+    if dob >= date.today():
+        return None
+
+    return dob
+
+
+def valid_date_range(start_date, end_date):
+    """ Return true when both dates form a valid chronological range, or both are empty. """
+
+    if not start_date and not end_date:
+        return True
+
+    if not start_date or not end_date:
+        return False
+
+    try:
+        start_date = date.fromisoformat(start_date)
+        end_date = date.fromisoformat(end_date)
+    except (TypeError, ValueError):
+        return False
+
+    return start_date <= end_date

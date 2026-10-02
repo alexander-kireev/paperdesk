@@ -1,60 +1,15 @@
 {% extends "base.html" %}
-
-{% block title %}Change email{% endblock %}
-
+{% block title %}Change email | Paper Desk{% endblock %}
 {% block content %}
-
-<!-- heading -->
-<div class="row text-center">
-  <h2>Change email address</h2>
+<div class="form-page">
+  <header class="page-heading"><div><h1>Change email address</h1><p>Update the email address used to log in to Paper Desk.</p></div></header>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+  <section class="card"><div class="form-card"><form action="/change_email" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row mb-3 align-items-center"><label for="current_email" class="col-12 col-sm-5 col-form-label">Current email</label><div class="col-12 col-sm-7"><input type="email" readonly class="form-control-plaintext" id="current_email" value="{{ current_email }}"></div></div>
+    <div class="row mb-3 align-items-center"><label for="new_email" class="col-12 col-sm-5 col-form-label">New email</label><div class="col-12 col-sm-7"><input type="email" class="form-control" id="new_email" name="new_email" autocomplete="email" required></div></div>
+    <div class="row mb-3 align-items-center"><label for="password" class="col-12 col-sm-5 col-form-label">Current password</label><div class="col-12 col-sm-7"><input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required></div></div>
+    <div class="row mt-4"><div class="col-12 col-sm-7 offset-sm-5 d-flex flex-wrap gap-2"><button type="submit" class="btn btn-primary">Save changes</button><a href="/my_details" class="btn btn-secondary">Cancel</a></div></div>
+  </form></div></section>
 </div>
-
-<!-- flash messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, msg in messages %}
-      <div class="alert alert-{{ category }}">
-        {{ msg }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-<!-- change email form -->
-<form action="/change_email" method="POST">
-
-  <!-- current email -->
-  <div class="row mb-3">
-    <label for="current_email" class="col-sm-2 col-form-label">Current email:</label>
-    <div class="col-sm-10">
-      <input type="text" readonly class="form-control-plaintext" id="current_email" value="{{ current_email }}">
-    </div>
-  </div>
-
-  <!-- new email -->
-  <div class="row mb-3">
-    <label for="new_email" class="col-sm-2 col-form-label">New email:</label>
-    <div class="col-sm-10">
-      <input type="email" class="form-control" id="new_email" name="new_email" required>
-    </div>
-  </div>
-
-  <!-- password -->
-  <div class="row mb-3">
-    <label for="password" class="col-sm-2 col-form-label">Password</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-  </div>
-
-  <!-- action buttons -->
-  <div class="row">
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="/my_details" class="btn btn-danger">Cancel</a>
-    </div>
-  </div>
-
-</form>
-
 {% endblock %}

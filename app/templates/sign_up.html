@@ -1,83 +1,24 @@
 {% extends "base.html" %}
-
-{% block title %}Sign Up{% endblock %}
-
+{% block title %}Create account | Paper Desk{% endblock %}
 {% block content %}
-<div class="container my-5">
-
-  <!-- heading -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <h2 class="fw-bold text-uppercase text-dark">Sign Up</h2>
-      <p class="text-muted">Create your account</p>
-    </div>
-  </div>
-
-  <!-- flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }} text-center">
-          {{ msg }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <!-- sign up card -->
-  <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-6">
-      <div class="card shadow-sm">
-        <div class="card-body p-4">
-
-          <form action="/sign_up" method="POST">
-
-            <!-- first name -->
-            <div class="mb-3">
-              <label for="first_name" class="form-label fw-bold">First Name</label>
-              <input type="text" class="form-control" id="first_name" name="first_name" required>
-            </div>
-
-            <!-- last name -->
-            <div class="mb-3">
-              <label for="last_name" class="form-label fw-bold">Last Name</label>
-              <input type="text" class="form-control" id="last_name" name="last_name" required>
-            </div>
-
-            <!-- date of birth -->
-            <div class="mb-3">
-              <label for="dob" class="form-label fw-bold">Date of Birth</label>
-              <input type="date" class="form-control" id="dob" name="dob" required>
-            </div>
-
-            <!-- email -->
-            <div class="mb-3">
-              <label for="email" class="form-label fw-bold">Email</label>
-              <input type="email" class="form-control" id="email" name="email" required>
-            </div>
-
-            <!-- password -->
-            <div class="mb-3">
-              <label for="first_password" class="form-label fw-bold">Password</label>
-              <input type="password" class="form-control" id="first_password" name="first_password" required>
-            </div>
-
-            <!-- confirm password -->
-            <div class="mb-4">
-              <label for="second_password" class="form-label fw-bold">Confirm Password</label>
-              <input type="password" class="form-control" id="second_password" name="second_password" required>
-            </div>
-
-            <!-- submit -->
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary">Create Account</button>
-            </div>
-
-          </form>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="auth-main"><div class="auth-layout">
+  <section class="auth-copy">
+    <p class="eyebrow">Create an account</p><h1>Start with simulated funds and build from there.</h1><p>Your account keeps open positions, trades and cash activity together. Registration creates an opening balance that can be used immediately.</p>
+    <div class="auth-points"><div class="auth-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Simulated starting balance</div><div class="auth-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Current market searches</div><div class="auth-point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>Trade and transaction records</div></div>
+  </section>
+  <section class="auth-card">
+    <h2>Create your account</h2><p>All fields are required.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    <form class="form-grid" action="/sign_up" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-grid form-grid-two"><div class="field"><label for="first_name">First name</label><input id="first_name" name="first_name" autocomplete="given-name" required></div><div class="field"><label for="last_name">Last name</label><input id="last_name" name="last_name" autocomplete="family-name" required></div></div>
+      <div class="field"><label for="dob">Date of birth</label><input id="dob" name="dob" type="date" autocomplete="bday" required></div>
+      <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="first_password">Password</label><input id="first_password" name="first_password" type="password" autocomplete="new-password" required><p class="form-help">Use at least twelve characters.</p></div>
+      <div class="field"><label for="second_password">Confirm password</label><input id="second_password" name="second_password" type="password" autocomplete="new-password" required></div>
+      <button class="button button-primary button-block" type="submit">Create account</button>
+    </form>
+    <p class="auth-switch">Already registered? <a href="/log_in">Log in</a></p>
+  </section>
+</div></div>
 {% endblock %}

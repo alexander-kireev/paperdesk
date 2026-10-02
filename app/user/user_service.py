@@ -1,4 +1,7 @@
 from app.db_core import DBCore
+from decimal import Decimal
+
+from app.user.user_model import User
 from app.user.user_repo import (
     insert_user,
     get_user_by_email,
@@ -20,22 +23,12 @@ from app.transaction.transaction_repo import (
 from app.utils import  (
     email_is_valid, 
     hash_password,
-    verify_password
+    verify_password,
 )
 
+DEFAULT_USER_BALANCE = Decimal("10000.00")
 
-from app.position.position_service import (
-    update_positions_in_table
-)
 
-from app.position.position_repo import (
-    get_all_user_positions
-)
-
-from app.user.user_model import User
-from datetime import datetime
-
-# tested, functional, commented
 def register_user(data):
     """ Accepts dict containing validated user registration data,
         instantiates a user object and inserts it into the users table. """
@@ -44,38 +37,19 @@ def register_user(data):
         with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
                 
-                # unpack user data
-                first_name = data["first_name"]
-                last_name = data["last_name"]
-                dob = data["dob"]
-                email = data["email"]
-                password = data["first_password"]
-                
                 # ensure proposed email is not already in use
-                if get_user_by_email(cur, email):
+                if get_user_by_email(cur, data["email"]):
                     return {
                         "success": False,
                         "message": "Email is already in use."
                     }
-                
-                # hash the raw password
-                password_hash = hash_password(password)
 
-                # default balance set for new users. adjust as needed.
-                default_balance = 10000.00
-
-                # format date of birth
-                dob = datetime.strptime(dob, "%Y-%m-%d").date()
+                data["cash_balance"] = DEFAULT_USER_BALANCE
+                data["password_hash"] = hash_password(data["password"])
+                data.pop("password")
 
                 # instantiate user object
-                new_user = User(first_name=first_name,
-                                last_name=last_name,
-                                dob=dob,
-                                email=email,
-                                password_hash=password_hash,
-                                cash_balance=default_balance,
-                                total_balance=default_balance
-                )
+                new_user = User(**data)
 
                 # ensure user was inserted into users table
                 if not insert_user(cur, new_user):
@@ -85,11 +59,11 @@ def register_user(data):
                     }
                 
                 # get newly registered user for the unique user_id
-                registered_user = get_user_by_email(cur, email)
+                registered_user = get_user_by_email(cur, data["email"])
 
                 # instantiate transaction object to log initial deposit in transactions table
                 transaction_type = "DEPOSIT"
-                transaction = Transaction(registered_user.id, default_balance, transaction_type)
+                transaction = Transaction(registered_user.id, DEFAULT_USER_BALANCE, transaction_type)
 
                 # ensure initial deposit transaction was logged in transactions table
                 if not log_transaction(cur, transaction):
@@ -104,15 +78,13 @@ def register_user(data):
                         "message": registered_user
                 }
                 
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to insert user: {e}."
+                "message": "Failed to register user."
         }
     
 
-# tested, functional, commented
 def delete_user(user_id):
     """ Accepts a user_id, authenticates user, deletes the user record from the users table. """
 
@@ -134,15 +106,13 @@ def delete_user(user_id):
                     "message": "User deleted successfully."
                 }
               
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to delete user: {e}."
+                "message": "Failed to delete user."
         }
         
 
-# tested, functional, commented
 def update_user_email(user_id, new_email, password):
     """ Accepts a user_id, new_email and password, authenticates user, updates user email. """
 
@@ -180,15 +150,13 @@ def update_user_email(user_id, new_email, password):
                     "message": "Email successfully updated."
                 }
                 
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to update user email: {e}."
+                "message": "Failed to update user email."
         }
     
 
-# tested, functional, commented
 def update_user_password(user_id, new_password_hash):
     """ Accepts a user_id and new_password_hash, updates user password. """
 
@@ -209,14 +177,13 @@ def update_user_password(user_id, new_password_hash):
                     "message": "Password successfully updated."
                 }
                 
-    except Exception as e:
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to update user password: {e}."
+                "message": "Failed to update user password."
         }
     
 
-# tested, functional, commented
 def deposit_user_funds(user_id, amount):
     """ Accepts a user_id and amount to deposit, updates the users table with the new cash balance. """
     conn = DBCore.get_connection()
@@ -229,7 +196,7 @@ def deposit_user_funds(user_id, amount):
                 user = get_user_by_id(cur, user_id)
 
                 # calculate new user cash_balance
-                new_balance = float(user.cash_balance) + amount
+                new_balance = user.cash_balance + amount
 
                 # ensure cash_balance was updated in users table
                 if not update_user_cash_balance(cur, user_id, new_balance):
@@ -255,28 +222,25 @@ def deposit_user_funds(user_id, amount):
                     "message": "Funds successfully deposited."
                 }
 
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to deposit funds: {e}."
+                "message": "Failed to deposit funds."
         }
     
 
-# tested, functional, commented
 def withdraw_user_funds(user_id, amount):
-    """ Accepts a user_id and amount to withdraw, validates amount, updates cash balance to reflect withdrawl. """
+    """ Accepts a user_id and amount to withdraw, then updates the user's cash balance. """
     conn = DBCore.get_connection()
 
     try:
         with conn:
             with conn.cursor() as cur:
                 
-                # get user object
                 user = get_user_by_id(cur, user_id)
 
                 # calculate new user cash_balance
-                new_balance = float(user.cash_balance) - amount
+                new_balance = user.cash_balance - amount
 
                 # ensure balance is positive, meaning user has sufficient funds to withdraw
                 if new_balance < 0:
@@ -300,7 +264,7 @@ def withdraw_user_funds(user_id, amount):
                 if not log_transaction(cur, transaction):
                     return {
                             "success": False,
-                            "message": "Failed to log withdrawl in transactions table."
+                            "message": "Failed to log withdrawal in transactions table."
                     }                            
 
                 conn.commit()
@@ -309,15 +273,13 @@ def withdraw_user_funds(user_id, amount):
                     "message": "Funds successfully withdrawn."
                 }            
 
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
                 "success": False,
-                "message": f"Error. Failed to withdraw funds: {e}."
+                "message": "Failed to withdraw funds."
         }   
  
 
-# tested, functional, commented
 def authenticate_user(email, password):
     """ Accepts email and password, returns True and user object if email is registered to
         a user and password matches. """
@@ -326,7 +288,6 @@ def authenticate_user(email, password):
         with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
 
-                # attempt to get user by email
                 user = get_user_by_email(cur, email)
 
                 # ensure user has been found
@@ -348,11 +309,13 @@ def authenticate_user(email, password):
                     "message": user 
                 }
 
-    except Exception as e:
-        return f"Failed to log in: {e}."
+    except Exception:
+        return {
+            "success": False,
+            "message": "Failed to log in. Please try again."
+        }
 
 
-# tested, functional, commented
 def get_user(data_point):
     """ Accepts an int user_id or an email address. If such a user exists, returns
         user object. """
@@ -373,35 +336,28 @@ def get_user(data_point):
                     except (ValueError, TypeError):
                         return None
 
-    except:
+    except Exception:
         return None
     
 
-# tested, functional, commented
 def update_user_details(user_id, user, first_name=None, last_name=None, dob=None):
     """ Accepts a user_id, user object and optional user details. Updates users table
         with new user personal details. """
 
-    # establish connection to database
-    conn = DBCore.get_connection()
-    
     try:
-        with conn:
+        with DBCore.get_connection() as conn:
             with conn.cursor() as cur:
                 
-                # update first name if required
                 if first_name:
                     if first_name != user.first_name:
                         if not insert_user_first_name(cur, user_id, first_name):
                             raise Exception
-                
-                # update last name if required
+
                 if last_name:
                     if last_name != user.last_name:
                         if not insert_user_last_name(cur, user_id, last_name):
                             raise Exception
-                
-                # update date of birth if required
+
                 if dob:
                     if dob != user.dob:
                         if not insert_user_dob(cur, user_id, dob):
@@ -412,9 +368,8 @@ def update_user_details(user_id, user, first_name=None, last_name=None, dob=None
                     "message": "User personal details successfully updated"
                 }
 
-    except Exception as e:
-        conn.rollback()
+    except Exception:
         return {
             "success": False,
-            "message": f"Error. Failed updating user's personal details: {e}"
+            "message": "Failed to update user details."
         }

@@ -1,109 +1,19 @@
 {% extends "base.html" %}
-
-{% block title %}Market{% endblock %}
-
+{% block title %}Explore market | Paper Desk{% endblock %}
 {% block content %}
-<div class="container my-5">
-
-  <!-- heading -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <h2 class="fw-bold text-uppercase text-dark">Market</h2>
-      <p class="text-muted">Search for stocks and view details. Log in to place trades.</p>
+<div class="container-xl px-3 px-lg-4">
+  <header class="preview-hero"><p class="eyebrow">Public market search</p><h1>Explore current share information.</h1><p>Search by symbol to review the company and the latest price returned by the market-data provider. Create an account when you are ready to place simulated trades.</p></header>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack preview-card">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+  <section class="card preview-card">
+    <div class="card-header"><h2>Search the market</h2></div>
+    <div class="card-body">
+      <form class="preview-search" action="/sample_market" method="GET"><div class="field"><label for="ticker">Share symbol</label><input id="ticker" name="ticker" value="{{ stock.symbol|upper if stock else '' }}" placeholder="For example, AAPL" required></div><button class="button button-primary" type="submit">Search</button></form>
+      {% if stock %}
+        <div class="preview-result"><div><span>Symbol</span><strong>{{ stock.symbol|upper }}</strong></div><div><span>Company</span><strong>{{ stock.company_name|titlecase }}</strong></div><div><span>Current price</span><strong>${{ stock.price|currency }}</strong></div><a class="button button-secondary button-small" href="/sign_up">Create account to trade</a></div>
+      {% else %}
+        <div class="empty-state"><div class="empty-icon" aria-hidden="true">⌕</div><h3>Search for a listed company</h3><p>Enter a market symbol such as AAPL, MSFT or TSLA to review the latest available information.</p></div>
+      {% endif %}
     </div>
-  </div>
-
-  <!-- flash messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }} text-center">
-          {{ msg }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-<div class="row g-4 align-items-stretch">
-
-  <!-- stock search -->
-  <div class="col-md-5">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        Search Stock
-      </div>
-      <div class="card-body">
-        <form action="/sample_market" method="GET">
-          <div class="mb-3">
-            <label for="ticker" class="form-label">Enter stock symbol:</label>
-            <input type="text" class="form-control" id="ticker" name="ticker" placeholder="e.g. AAPL, TSLA">
-          </div>
-          <button type="submit" class="btn btn-primary w-100">Search</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- stock info -->
-  <div class="col-md-7">
-    <div class="card shadow-sm h-100">
-      <div class="card-header">
-        Stock Details
-      </div>
-      <div class="card-body">
-        <!-- symbol -->
-        <div class="row mb-3">
-          <div class="col-sm-5 fw-bold">Symbol:</div>
-          <div class="col-sm-7">{{ stock.symbol|toupper if stock else '-' }}</div>
-        </div>
-
-        <!-- company -->
-        <div class="row mb-3">
-          <div class="col-sm-5 fw-bold">Company:</div>
-          <div class="col-sm-7">{{ stock.company_name|titlecase if stock else '-' }}</div>
-        </div>
-
-        <!-- current price -->
-        <div class="row mb-4">
-          <div class="col-sm-5 fw-bold">Current price:</div>
-          <div class="col-sm-7">
-            {{ stock.price|currency if stock else '-' }}
-          </div>
-        </div>
-
-        <!-- actions -->
-        <div class="d-flex justify-content-between">
-          <button type="button" class="btn btn-buy w-50 me-2" data-bs-toggle="modal" data-bs-target="#authModal">Buy</button>
-          <button type="button" class="btn btn-sell w-50" data-bs-toggle="modal" data-bs-target="#authModal">Sell</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-</div>
-
-<!-- auth required modal -->
-<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      
-      <div class="modal-header">
-        <h5 class="modal-title" id="authModalLabel">Log in Required</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <div class="modal-body text-center">
-        <p>You need to log in or register to place trades.</p>
-      </div>
-
-      <div class="modal-footer justify-content-center">
-        <a href="/log_in" class="btn btn-primary">Log In</a>
-        <a href="/sign_up" class="btn btn-secondary">Sign Up</a>
-      </div>
-
-    </div>
-  </div>
+  </section>
 </div>
 {% endblock %}

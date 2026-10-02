@@ -1,84 +1,52 @@
 {% extends "base.html" %}
-
-{% block title %}My Portfolio{% endblock %}
-
+{% block title %}Portfolio | Paper Desk{% endblock %}
 {% block content %}
-<div class="container my-5">
+<div class="app-main">
+  <header class="page-heading">
+    <div><h1>Your portfolio</h1><p>Review available cash, open positions and the current value of the account.</p></div>
+    <a class="button button-primary" href="/market">Trade shares</a>
+  </header>
 
-  <!-- heading -->
-  <div class="row mb-4">
-    <div class="col text-center">
-      <h2 class="fw-bold text-uppercase text-dark">My Portfolio</h2>
-    </div>
-  </div>
+  <section class="stat-grid" aria-label="Portfolio summary">
+    <article class="stat-card"><span class="stat-label">Cash balance</span><strong class="stat-value">${{ portfolio.cash_balance|currency }}</strong></article>
+    <article class="stat-card"><span class="stat-label">Holdings value</span><strong class="stat-value">${{ portfolio.positions_value|currency }}</strong></article>
+    <article class="stat-card"><span class="stat-label">Total portfolio value</span><strong class="stat-value">${{ portfolio.portfolio_value|currency }}</strong></article>
+  </section>
 
-  <div class="row g-4">
-    <!-- holdings -->
-    <div class="col-md-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header">
-          My Holdings
+  <div class="content-grid">
+    <section class="card">
+      <div class="card-header"><h2>Open positions</h2>{% if portfolio.positions %}<span class="stat-label">{{ portfolio.positions|length }} position{{ '' if portfolio.positions|length == 1 else 's' }}</span>{% endif %}</div>
+      {% if portfolio.positions %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Symbol</th><th>Company</th><th>Average cost</th><th>Current price</th><th>Shares</th><th>Current value</th></tr></thead>
+            <tbody>
+              {% for position in portfolio.positions.values() %}
+                <tr><td class="symbol">{{ position.symbol|upper }}</td><td>{{ position.company_name|titlecase }}</td><td>${{ position.price_per_share|currency }}</td><td>${{ position.last_price_per_share|currency }}</td><td>{{ position.number_of_shares }}</td><td><strong>${{ position.total_value|currency }}</strong></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        <div class="card-body">
+      {% else %}
+        <div class="empty-state"><div class="empty-icon" aria-hidden="true">↗</div><h3>No open positions yet</h3><p>Search the market and place a simulated buy order to begin building your portfolio.</p><a class="button button-primary" href="/market">Explore the market</a></div>
+      {% endif %}
+    </section>
 
-          <!-- portfolio summary -->
-          <div class="mb-4">
-            <p><strong>Cash Balance:</strong> ${{ portfolio.cash_balance|currency }}</p>
-            <p><strong>Total Portfolio Value:</strong> ${{ portfolio.portfolio_value|currency }}</p>
-          </div>
-
-          <!-- holdings table -->
-          {% if portfolio.positions %}
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-              <thead>
-                <tr>
-                  <th>Symbol</th>
-                  <th>Company</th>
-                  <th>Avg Cost</th>
-                  <th>Current Price</th>
-                  <th>Shares</th>
-                  <th>Position Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for position in portfolio.positions.values() %}
-                <tr>
-                  <td>{{ position.symbol|toupper }}</td>
-                  <td>{{ position.company_name|titlecase }}</td>
-                  <td>${{ position.price_per_share|currency }}</td>
-                  <td>${{ position.last_price_per_share|currency }}</td>
-                  <td>{{ position.number_of_shares }}</td>
-                  <td>${{ position.total_value|currency }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <p class="text-muted text-center">You currently hold no equities.</p>
-          {% endif %}
-
+    <aside>
+      <section class="card">
+        <div class="card-header"><h2>Portfolio actions</h2></div>
+        <div class="card-body action-list">
+          <a class="button button-primary button-block" href="/market">Buy or sell shares</a>
+          <a class="button button-secondary button-block" href="/trades">View trade history</a>
+          <a class="button button-secondary button-block" href="/account">Manage cash</a>
+          <a class="button button-secondary button-block" href="/portfolio_statement">Download statement</a>
         </div>
-      </div>
-    </div>
-
-    <!-- actions -->
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          Actions
-        </div>
-        <div class="card-body d-grid gap-3">
-          <a href="/market" class="btn btn-buy">Buy / Sell Stocks</a>
-          <a href="/account" class="btn btn-secondary">Deposit Funds</a>
-          <a href="/account" class="btn btn-secondary">Withdraw Funds</a>
-          <a href="/account" class="btn btn-secondary">See Account History</a>
-          <a href="/trade_history" class="btn btn-secondary">See Trade History</a>
-          <a href="/portfolio_statement" class="btn btn-primary">Download Portfolio Statement</a>
-        </div>
-      </div>
-    </div>
+      </section>
+      <section class="card">
+        <div class="card-header"><h2>About current values</h2></div>
+        <div class="card-body"><p class="search-help mt-0">Position values are refreshed using the latest price returned by the market-data provider. Prices may be delayed or temporarily unavailable.</p></div>
+      </section>
+    </aside>
   </div>
 </div>
 {% endblock %}

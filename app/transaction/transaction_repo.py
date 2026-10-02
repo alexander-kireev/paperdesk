@@ -1,20 +1,26 @@
 from app.transaction.transaction_model import Transaction
 
-# tested, functional, commented
 def get_transactions(cur, user_id, start_date, end_date):
-    """ Accepts cursor, user_id and returns list of user's trades as
+    """ Accepts cursor and user_id and returns the user's transactions as
         trade objects. If user has not performed any trades, will return
         and empty list. If start and end date are provided, will filter 
         results to those dates. """
 
     # take path depending on whether start and end date were provided
     if start_date and end_date:
-        cur.execute(""" SELECT * FROM transactions WHERE user_id=%s 
-                    AND timestamp >= %s AND timestamp <= %s 
-                    ORDER BY timestamp DESC """, (user_id, start_date, end_date))
+        cur.execute("""
+            SELECT transaction_id, user_id, amount, transaction_type, created_at
+            FROM transactions
+            WHERE user_id=%s AND created_at >= %s AND created_at <= %s
+            ORDER BY created_at DESC
+        """, (user_id, start_date, end_date))
     else:
-        cur.execute(""" SELECT * FROM transactions WHERE user_id=%s 
-                    ORDER BY timestamp """, (user_id,))
+        cur.execute("""
+            SELECT transaction_id, user_id, amount, transaction_type, created_at
+            FROM transactions
+            WHERE user_id=%s
+            ORDER BY created_at DESC
+        """, (user_id,))
 
     rows = cur.fetchall()
     transactions_list = []
@@ -24,15 +30,14 @@ def get_transactions(cur, user_id, start_date, end_date):
         for row in rows:
 
             # unpack each row, instantiate transaction object
-            (transaction_id, user_id, amount, transaction_type, timestamp) = row
+            (transaction_id, user_id, amount, transaction_type, created_at) = row
             transaction = Transaction(user_id=user_id, amount=amount, transaction_type=transaction_type,
-                                      timestamp=timestamp, transaction_id=transaction_id)
+                                      timestamp=created_at, transaction_id=transaction_id)
             transactions_list.append(transaction)
     
     return transactions_list
 
 
-# tested, functional, commented
 def log_transaction(cur, transaction):
     """ Accepts cursor and transaction object, inserts it into transactions table. """
 

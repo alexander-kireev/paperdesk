@@ -1,49 +1,16 @@
 {% extends "base.html" %}
-
-{% block title %}Delete account{% endblock %}
-
+{% block title %}Delete account | Paper Desk{% endblock %}
 {% block content %}
-
-<!-- heading -->
-<div class="row text-center">
-  <h2>Delete account</h2>
+<div class="form-page">
+  <header class="page-heading"><div><h1>Delete account</h1><p>Permanently remove your Paper Desk account and its recorded activity.</p></div></header>
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack">{% for category, msg in messages %}<div class="alert alert-{{ category }}">{{ msg }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+  <section class="card danger-card"><div class="form-card">
+    <div class="notice notice-info">This action cannot be undone. Your open positions, trades and account transactions will be removed.</div>
+    <form action="/delete_account" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="row mb-3 align-items-center"><label for="password" class="col-12 col-sm-5 col-form-label">Current password</label><div class="col-12 col-sm-7"><input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required></div></div>
+      <div class="row mt-4"><div class="col-12 col-sm-7 offset-sm-5 d-flex flex-wrap gap-2"><button type="submit" class="btn btn-danger">Delete account</button><a href="/my_details" class="btn btn-secondary">Cancel</a></div></div>
+    </form>
+  </div></section>
 </div>
-
-<!-- flash messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, msg in messages %}
-      <div class="alert alert-{{ category }}">
-        {{ msg }}
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-<!-- delete account form -->
-<form action="/delete_account" method="POST">
-  
-  <!-- confirmation text -->
-  <div class="row text-center mb-3">
-    <h4>Are you sure you want to delete your account?</h4>
-  </div>
-
-  <!-- password input -->
-  <div class="row mb-3">
-    <label for="password" class="col-sm-2 col-form-label">Password:</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-  </div>
-
-  <!-- action buttons -->
-  <div class="row">
-    <div class="text-center">
-      <button type="submit" class="btn btn-danger">Delete account</button>
-      <a href="/my_details" class="btn btn-secondary">Cancel</a>
-    </div>
-  </div>
-
-</form>
-
 {% endblock %}

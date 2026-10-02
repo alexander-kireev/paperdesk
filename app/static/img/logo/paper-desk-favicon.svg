@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Paper Desk favicon</title>
+  <desc id="desc">Simplified Paper Desk favicon.</desc>
+  <rect width="64" height="64" rx="15" fill="#172033"/>
+  <g transform="scale(0.5333333333)">
+    <path d="M43 26 H71 C91 26 105 42 105 60 C105 79 91 95 71 95 H43 Z M59 40 H71 C82 40 91 49 91 60 C91 71 82 79 71 79 H59 Z" fill="#FFFFFF" fill-rule="evenodd"/>
+    <path d="M18 26 H45 C60 26 70 36 70 49 C70 62 60 73 45 73 H34 V95 H18 Z" fill="#466A8F"/>
+    <path d="M34 40 H45 C51 40 55 44 55 49 C55 54 51 58 45 58 H34 Z" fill="#172033"/>
+  </g>
+</svg>

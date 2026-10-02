@@ -16,7 +16,6 @@ NASDAQ_URL = "ftp://ftp.nasdaqtrader.com/SymbolDirectory/nasdaqlisted.txt"
 OTHER_URL = "ftp://ftp.nasdaqtrader.com/SymbolDirectory/otherlisted.txt"
 
 
-# tested, functional, commented
 def get_nasdaq_tickers():
     """ Generates a csv file containing symbols of companies trading on the NASDAQ exchange. """
 
@@ -31,7 +30,6 @@ def get_nasdaq_tickers():
     tickers_column.to_csv(save_path, index=False, header="Symbol")
 
 
-# tested, functional, commented
 def get_nyse_tickers():
     """ Generates a csv file containing symbols of companies trading on the NYSE exchange. """
 
@@ -50,7 +48,6 @@ def get_nyse_tickers():
     tickers_column.to_csv(save_path, index=False, header="Symbol")
 
 
-# tested, functional, commented
 def get_amex_tickers():
     """ Generates a csv file containing symbols of companies trading on the AMEX exchange. """
 
@@ -69,7 +66,6 @@ def get_amex_tickers():
     tickers_column.to_csv(save_path, index=False, header="Symbol")
 
 
-# tested, functional, commented
 def load_nasdaq_tickers():
     """ Loads the symbols from the nasdaq.csv file into a pandas DF and returns as a list. """
 
@@ -83,7 +79,6 @@ def load_nasdaq_tickers():
     return df["Symbol"].tolist()
 
 
-# tested, functional, commented
 def load_nyse_tickers():
     """ Loads the symbols from the nyse.csv file into a pandas DF and returns as a list. """
 
@@ -97,7 +92,6 @@ def load_nyse_tickers():
     return df["Symbol"].tolist()
 
 
-# tested, functional, commented
 def load_amex_tickers():
     """ Loads the symbols from the amex.csv file into a pandas DF and returns as a list. """
 
@@ -111,7 +105,6 @@ def load_amex_tickers():
     return df["Symbol"].tolist()
 
 
-# tested, functional, commented
 def get_all_symbols():
     """ Loads the symbols of companies traded on the NASDAQ, NYSE AND AMEX and returns
         them as a set. """
