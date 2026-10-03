@@ -18,11 +18,11 @@
       <div class="card-header"><h2>Open positions</h2>{% if portfolio.positions %}<span class="stat-label">{{ portfolio.positions|length }} position{{ '' if portfolio.positions|length == 1 else 's' }}</span>{% endif %}</div>
       {% if portfolio.positions %}
         <div class="table-wrap">
-          <table class="data-table">
+          <table class="data-table portfolio-table">
             <thead><tr><th>Symbol</th><th>Company</th><th>Average cost</th><th>Current price</th><th>Shares</th><th>Current value</th></tr></thead>
             <tbody>
               {% for position in portfolio.positions.values() %}
-                <tr><td class="symbol">{{ position.symbol|upper }}</td><td>{{ position.company_name|titlecase }}</td><td>${{ position.price_per_share|currency }}</td><td>${{ position.last_price_per_share|currency }}</td><td>{{ position.number_of_shares }}</td><td><strong>${{ position.total_value|currency }}</strong></td></tr>
+                <tr><td class="symbol" data-label="Symbol">{{ position.symbol|upper }}</td><td data-label="Company">{{ position.company_name|titlecase }}</td><td data-label="Average cost">${{ position.price_per_share|currency }}</td><td data-label="Current price">${{ position.last_price_per_share|currency }}</td><td data-label="Shares">{{ position.number_of_shares }}</td><td data-label="Current value"><strong>${{ position.total_value|currency }}</strong></td></tr>
               {% endfor %}
             </tbody>
           </table>

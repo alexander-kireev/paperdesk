@@ -144,7 +144,8 @@ def valid_last_name(last_name):
 
 def valid_password(password):
     """ Accepts a password and checks if it is between 12 and 24 characters long
-        and contains at least one digit, one uppercase and one lowercase character. """
+        and contains at least one digit, one uppercase and one lowercase character.
+        Symbols are allowed, but whitespace is not. """
 
     has_lowercase = False
     has_uppercase = False
@@ -160,7 +161,7 @@ def valid_password(password):
             has_lowercase = True
         elif char.isupper():
             has_uppercase = True
-        else:
+        elif char.isspace():
             return None
 
     if has_digit and has_lowercase and has_uppercase:

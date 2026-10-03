@@ -31,7 +31,8 @@ def test_email_validation(email, expected):
         ("StudentPass1", True),
         ("short1A", False),
         ("alllowercase1", False),
-        ("NoSymbolsAllowed!1", False),
+        ("SymbolsAllowed!1", True),
+        ("No Spaces Here1A", False),
     ],
 )
 def test_password_validation(password, is_valid):
