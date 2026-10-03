@@ -167,19 +167,15 @@ The application will be available at `http://127.0.0.1:5000`.
 
 ## Deployment
 
-Paper Desk can be deployed using a free Render web service and a free Neon
-PostgreSQL database. The included `render.yaml` installs the runtime
-dependencies, applies the Alembic migration and starts the application with
-Gunicorn.
+Paper Desk is deployed on Render using the included `render.yaml` Blueprint.
+The application runs with Gunicorn on a free web service, with PostgreSQL
+provided by Neon.
 
-1. Create a Neon project and copy its pooled PostgreSQL connection URL.
-2. In Render, create a new Blueprint from the `main` branch of this repository.
-3. Enter the Neon connection URL when Render requests `DATABASE_URL`.
-4. Deploy the Blueprint. Render generates `SECRET_KEY` automatically.
-
-The Render service uses the free compute plan and checks `/` to confirm that a
-deployment is healthy. Free services sleep while inactive, so the first request
-after a period without traffic may take longer.
+Each deployment installs the required dependencies and applies the latest
+Alembic migration before starting the application. Render also performs a
+health check against the home page. As the service uses the free compute plan,
+the first request after a period of inactivity may take longer while the
+application starts.
 
 ## Tests
 
