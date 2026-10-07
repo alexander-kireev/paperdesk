@@ -8,4 +8,4 @@ python-dotenv==1.1.1
 pandas==2.3.2
 psycopg2==2.9.10
 SQLAlchemy==2.1.1
-yfinance==0.2.66
+yfinance==1.7.0

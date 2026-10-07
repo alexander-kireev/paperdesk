@@ -7,6 +7,40 @@ from app.stock.stock_model import Stock
 from app.stock import stock_service
 
 
+def test_create_stock_uses_fast_price_and_company_name(monkeypatch):
+    class FakeTicker:
+        def __init__(self, symbol):
+            assert symbol == "AAPL"
+            self.fast_info = {"lastPrice": 123.456}
+            self.info = {"shortName": "Apple Inc."}
+
+    monkeypatch.setattr(stock_service, "Ticker", FakeTicker)
+
+    stock = stock_service.create_stock("aapl")
+
+    assert stock.company_name == "apple inc."
+    assert stock.symbol == "aapl"
+    assert stock.price == Decimal("123.46")
+
+
+def test_create_stock_keeps_price_when_company_info_fails(monkeypatch):
+    class FakeTicker:
+        def __init__(self, symbol):
+            self.fast_info = {"lastPrice": 123.456}
+
+        @property
+        def info(self):
+            raise ConnectionError("Company information unavailable")
+
+    monkeypatch.setattr(stock_service, "Ticker", FakeTicker)
+
+    stock = stock_service.create_stock("AAPL")
+
+    assert stock.company_name == "aapl"
+    assert stock.symbol == "aapl"
+    assert stock.price == Decimal("123.46")
+
+
 def test_live_stock_price_returns_decimal(monkeypatch):
     class FakeTicker:
         def __init__(self, symbol):

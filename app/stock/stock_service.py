@@ -1,30 +1,31 @@
 from decimal import Decimal
 
 from yfinance import Ticker
+
 from app.stock.stock_model import Stock
 
 
 def create_stock(symbol):
-    """ Accepts a stock symbol, fetches live stock data and returns stock object. """
+    """Fetch current market data and return a stock object when available."""
+
+    symbol = symbol.upper()
 
     try:
-
-        # format and retrieve data
-        symbol = symbol.upper()
-        data = Ticker(symbol).info
-        price = data["regularMarketPrice"]
-
-        company_name = data["shortName"]
-
-        return Stock(company_name, symbol, price)
-
+        ticker = Ticker(symbol)
+        price = ticker.fast_info["lastPrice"]
     except Exception:
         return None
 
+    try:
+        company_name = ticker.info.get("shortName") or symbol
+    except Exception:
+        company_name = symbol
+
+    return Stock(company_name, symbol, price)
+
 
 def create_stocks(symbols):
-    """ Accepts a list of stock symbols, returns a dictionary with stock symbols as keys and stock objects
-        as values. """
+    """Return stock objects keyed by symbol for the supplied symbol list."""
 
     stocks = {}
 
@@ -35,12 +36,7 @@ def create_stocks(symbols):
 
 
 def live_stock_price(symbol):
-    """ Accepts an equity symbol and returns its live price as a Decimal. """
+    """Return the latest available equity price as a Decimal."""
 
     price = Ticker(symbol).fast_info["lastPrice"]
     return Decimal(str(price)).quantize(Decimal("0.01"))
-
-
-
-
-
