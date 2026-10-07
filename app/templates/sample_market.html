@@ -9,7 +9,7 @@
     <div class="card-body">
       <form class="preview-search" action="/sample_market" method="GET"><div class="field"><label for="ticker">Share symbol</label><input id="ticker" name="ticker" value="{{ stock.symbol|upper if stock else '' }}" placeholder="For example, AAPL" required></div><button class="button button-primary" type="submit">Search</button></form>
       {% if stock %}
-        <div class="preview-result"><div><span>Symbol</span><strong>{{ stock.symbol|upper }}</strong></div><div><span>Company</span><strong>{{ stock.company_name|titlecase }}</strong></div><div><span>Current price</span><strong>${{ stock.price|currency }}</strong></div><a class="button button-secondary button-small" href="/sign_up">Create account to trade</a></div>
+        <div class="preview-result"><div><span>Symbol</span><strong>{{ stock.symbol|upper }}</strong></div><div><span>Company</span><strong>{{ stock.symbol|upper if stock.company_name == stock.symbol else stock.company_name|titlecase }}</strong></div><div><span>Current price</span><strong>${{ stock.price|currency }}</strong></div><a class="button button-secondary button-small" href="/sign_up">Create account to trade</a></div>
       {% else %}
         <div class="empty-state"><div class="empty-icon" aria-hidden="true">⌕</div><h3>Search for a listed company</h3><p>Enter a market symbol such as AAPL, MSFT or TSLA to review the latest available information.</p></div>
       {% endif %}

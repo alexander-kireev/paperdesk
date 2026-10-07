@@ -20,7 +20,7 @@
     </section>
 
     <section class="card">
-      <div class="card-header"><h2>{{ stock.company_name|titlecase if stock else 'Share information' }}</h2><span class="symbol">{{ stock.symbol|upper if stock else '' }}</span></div>
+      <div class="card-header"><h2>{{ (stock.symbol|upper if stock.company_name == stock.symbol else stock.company_name|titlecase) if stock else 'Share information' }}</h2><span class="symbol">{{ stock.symbol|upper if stock else '' }}</span></div>
       {% if stock %}
         <div class="card-body">
           <form action="/place_order" method="POST">

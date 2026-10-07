@@ -22,6 +22,22 @@ def test_get_only_routes_reject_post(client, authenticated_client):
     assert client.post("/sample_market").status_code == 405
 
 
+def test_sample_market_preserves_symbol_case_when_company_name_is_unavailable(
+    client, monkeypatch
+):
+    monkeypatch.setattr(app_module, "ALL_SYMBOLS", {"AAPL"})
+    monkeypatch.setattr(
+        app_module,
+        "create_stock",
+        lambda symbol: Stock(symbol, symbol, "123.45"),
+    )
+
+    response = client.get("/sample_market?ticker=AAPL")
+
+    assert response.status_code == 200
+    assert response.data.count(b"<strong>AAPL</strong>") == 2
+
+
 def test_logout_rejects_get(authenticated_client):
     assert authenticated_client.get("/log_out").status_code == 405
 
